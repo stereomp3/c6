@@ -483,7 +483,7 @@ int prog() {
 int compile(int fd) {
   int i, *t;
   // 編譯器
-  p = "char else enum if int return sizeof while do for"
+  p = "char else enum if int return sizeof while do for "
       "open read write close printf malloc free memset memcmp exit void main";
   i = Char; while (i <= While) { next(); id[Tk] = i++; } // add keywords to symbol table
   i = OPEN; while (i <= EXIT) { next(); id[Class] = Sys; id[Type] = INT; id[Val] = i++; } // add library to symbol table
