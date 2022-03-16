@@ -35,7 +35,7 @@ int *pc, *bp, *sp, codeLen, dataLen;
 // tokens and classes (operators last and in precedence order) (按優先權順序排列)
 enum { // token : 0-127 直接用該字母表達， 128 以後用代號。
   Num = 128, Fun, Sys, Glo, Loc, Id,
-  Char, Else, Enum, If, Int, Return, Sizeof, While,
+  Char, Else, Enum, If, Int, Return, Sizeof, While, DO, FOR,
   Assign, Cond, Lor, Lan, Or, Xor, And, Eq, Ne, Lt, Gt, Le, Ge, Shl, Shr, Add, Sub, Mul, Div, Mod, Inc, Dec, Brak
 };
 
@@ -335,6 +335,17 @@ void stmt() {
     *++e = JMP; *++e = (int)a;
     *b = (int)(e + 1);
   }
+  else if (tk == DO){
+    next();
+    a = e + 1;
+    stmt();
+    if (tk == While) next(); else { printf("%d: open while expected\n", line); exit(-1); }
+    if (tk == '(') next(); else { printf("%d: open paren expected\n", line); exit(-1); }
+    expr(Assign);
+    if (tk == ')') next(); else { printf("%d: close paren expected\n", line); exit(-1); }
+    if (tk == ';') next(); else { printf("%d: close ; expected\n", line); exit(-1); }
+    *++e = BNZ; *++e = (int)a; // BNZ是代表不是 0 的時候跳，這裡是跳入迴圈
+  }
   else if (tk == Return) { // return 語句
     next();
     if (tk != ';') expr(Assign);
@@ -459,7 +470,7 @@ int prog() {
 int compile(int fd) {
   int i, *t;
   // 編譯器
-  p = "char else enum if int return sizeof while "
+  p = "char else enum if int return sizeof while do for "
       "open read write close printf malloc free memset memcmp exit void main";
   i = Char; while (i <= While) { next(); id[Tk] = i++; } // add keywords to symbol table
   i = OPEN; while (i <= EXIT) { next(); id[Class] = Sys; id[Type] = INT; id[Val] = i++; } // add library to symbol table
